@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup Fan Voting</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    background:#f4f4f4;
+    padding:20px;
+}
+.match{
+    background:white;
+    margin:20px auto;
+    padding:20px;
+    max-width:500px;
+    border-radius:10px;
+}
+button{
+    padding:10px 20px;
+    margin:5px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>⚽ World Cup Fan Vote</h1>
+
+<div class="match">
+    <h2>Today's Match</h2>
+    <h3 id="todayMatch">Mexico vs South Africa</h3>
+
+    <button onclick="vote('Mexico')">Mexico</button>
+    <button onclick="vote('South Africa')">South Africa</button>
+
+    <p>Mexico Votes: <span id="mexicoVotes">0</span></p>
+    <p>South Africa Votes: <span id="saVotes">0</span></p>
+</div>
+
+<div class="match">
+    <h2>Tomorrow Morning</h2>
+    <h3>South Korea vs Czech Republic</h3>
+</div>
+
+<script type="module">
+
+  },
+
+window.vote = function(team){
+
+    const voteRef = ref(db, "votes/" + team);
+
+    runTransaction(voteRef, (currentVotes)=>{
+        return (currentVotes || 0) + 1;
+    });
+}
+
+onValue(ref(db,"votes/Mexico"),(snapshot)=>{
+    document.getElementById("mexicoVotes").textContent =
+    snapshot.val() || 0;
+});
+
+onValue(ref(db,"votes/South Africa"),(snapshot)=>{
+    document.getElementById("saVotes").textContent =
+    snapshot.val() || 0;
+});
+
+</script>
+
+</body>
+</html>
