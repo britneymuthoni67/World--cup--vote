@@ -23,6 +23,22 @@ button{
     padding:10px 20px;
     margin:5px;
     cursor:pointer;
+    background:#007bff;
+    color:white;
+    border:none;
+    border-radius:5px;
+    font-size:16px;
+    transition: background 0.3s;
+}
+button:hover{
+    background:#0056b3;
+}
+button:active{
+    transform: scale(0.98);
+}
+p{
+    font-size:18px;
+    margin:10px 0;
 }
 </style>
 </head>
@@ -34,8 +50,8 @@ button{
     <h2>Today's Match</h2>
     <h3 id="todayMatch">Mexico vs South Africa</h3>
 
-    <button onclick="vote('Mexico')">Mexico</button>
-    <button onclick="vote('South Africa')">South Africa</button>
+    <button onclick="vote('Mexico')">Vote for Mexico</button>
+    <button onclick="vote('South Africa')">Vote for South Africa</button>
 
     <p>Mexico Votes: <span id="mexicoVotes">0</span></p>
     <p>South Africa Votes: <span id="saVotes">0</span></p>
@@ -44,29 +60,61 @@ button{
 <div class="match">
     <h2>Tomorrow Morning</h2>
     <h3>South Korea vs Czech Republic</h3>
+
+    <button onclick="vote('South Korea')">Vote for South Korea</button>
+    <button onclick="vote('Czech Republic')">Vote for Czech Republic</button>
+
+    <p>South Korea Votes: <span id="koreaVotes">0</span></p>
+    <p>Czech Republic Votes: <span id="czechVotes">0</span></p>
 </div>
 
 <script type="module">
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-  },
+// Your Firebase configuration (replace with your actual config)
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    databaseURL: "YOUR_DATABASE_URL"
+};
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Vote function
 window.vote = function(team){
-
     const voteRef = ref(db, "votes/" + team);
-
+    
     runTransaction(voteRef, (currentVotes)=>{
         return (currentVotes || 0) + 1;
     });
 }
 
+// Listen for Mexico votes
 onValue(ref(db,"votes/Mexico"),(snapshot)=>{
-    document.getElementById("mexicoVotes").textContent =
-    snapshot.val() || 0;
+    document.getElementById("mexicoVotes").textContent = snapshot.val() || 0;
 });
 
+// Listen for South Africa votes
 onValue(ref(db,"votes/South Africa"),(snapshot)=>{
-    document.getElementById("saVotes").textContent =
-    snapshot.val() || 0;
+    document.getElementById("saVotes").textContent = snapshot.val() || 0;
+});
+
+// Listen for South Korea votes
+onValue(ref(db,"votes/South Korea"),(snapshot)=>{
+    document.getElementById("koreaVotes").textContent = snapshot.val() || 0;
+});
+
+// Listen for Czech Republic votes
+onValue(ref(db,"votes/Czech Republic"),(snapshot)=>{
+    document.getElementById("czechVotes").textContent = snapshot.val() || 0;
 });
 
 </script>
