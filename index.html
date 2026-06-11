@@ -1,154 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>World Cup Fan Voting</title>
+<title>World Cup Vote</title>
 
 <style>
-body{
-    font-family:Arial,sans-serif;
-    text-align:center;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
-    min-height:100vh;
-    padding:20px;
-    margin:0;
+body {
+  margin: 0;
+  font-family: Arial;
+  color: white;
+  text-align: center;
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: bg 10s ease infinite;
 }
-h1{
-    color:white;
-    font-size:48px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    margin-bottom:30px;
+
+@keyframes bg {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
 }
-.match{
-    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,255,0.95) 100%);
-    margin:20px auto;
-    padding:30px;
-    max-width:500px;
-    border-radius:15px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    border: 3px solid rgba(255,255,255,0.3);
+
+h1 { margin-top: 20px; }
+
+.card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  width: 320px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 15px;
 }
-.match h2{
-    color:#1e3c72;
-    margin-top:0;
-    font-size:20px;
-    text-transform:uppercase;
-    letter-spacing:1px;
+
+button {
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
-.match h3{
-    color:#2a5298;
-    font-size:24px;
-    margin:15px 0;
-}
-button{
-    padding:12px 24px;
-    margin:8px;
-    cursor:pointer;
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    font-weight:bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(231,76,60,0.4);
-}
-button:hover{
-    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(231,76,60,0.6);
-}
-button:active{
-    transform: translateY(0) scale(0.98);
-}
-p{
-    font-size:18px;
-    margin:12px 0;
-    color:#333;
-    font-weight:bold;
-}
-span{
-    color:#e74c3c;
-    font-size:24px;
-}
+
+.team1 { background: #00c853; color: white; }
+.team2 { background: #ff1744; color: white; }
+
+.count { margin-top: 10px; }
 </style>
 </head>
+
 <body>
 
-<h1>⚽ World Cup Fan Vote</h1>
+<h1>⚽ World Cup Predictor</h1>
 
-<div class="match">
-    <h2>Today's Match</h2>
-    <h3 id="todayMatch">Mexico vs South Africa</h3>
+<!-- TODAY MATCH -->
+<div class="card">
+  <h2>Today</h2>
+  <h3>Mexico vs South Africa</h3>
 
-    <button onclick="vote('Mexico')">Vote for Mexico</button>
-    <button onclick="vote('South Africa')">Vote for South Africa</button>
+  <button class="team1" onclick="vote('mexico')">Mexico</button>
+  <button class="team2" onclick="vote('sa')">South Africa</button>
 
-    <p>Mexico Votes: <span id="mexicoVotes">0</span></p>
-    <p>South Africa Votes: <span id="saVotes">0</span></p>
+  <div class="count">
+    Mexico: <span id="mexico">0</span><br>
+    South Africa: <span id="sa">0</span>
+  </div>
 </div>
 
-<div class="match">
-    <h2>Tomorrow Morning</h2>
-    <h3>South Korea vs Czech Republic</h3>
+<!-- MORNING MATCH -->
+<div class="card">
+  <h2>Tomorrow Morning</h2>
+  <h3>South Korea vs Czech Republic</h3>
 
-    <button onclick="vote('South Korea')">Vote for South Korea</button>
-    <button onclick="vote('Czech Republic')">Vote for Czech Republic</button>
+  <button class="team1" onclick="vote('korea')">South Korea</button>
+  <button class="team2" onclick="vote('czech')">Czech Republic</button>
 
-    <p>South Korea Votes: <span id="koreaVotes">0</span></p>
-    <p>Czech Republic Votes: <span id="czechVotes">0</span></p>
+  <div class="count">
+    South Korea: <span id="korea">0</span><br>
+    Czech Republic: <span id="czech">0</span>
+  </div>
 </div>
 
-<script type="module">
-// Import Firebase modules
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+<script>
+function loadVotes(){
+  let keys = ["mexico","sa","korea","czech"];
 
-// Your Firebase configuration (replace with your actual config)
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    databaseURL: "YOUR_DATABASE_URL"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// Vote function
-window.vote = function(team){
-    const voteRef = ref(db, "votes/" + team);
-    
-    runTransaction(voteRef, (currentVotes)=>{
-        return (currentVotes || 0) + 1;
-    });
+  keys.forEach(k=>{
+    document.getElementById(k).innerText = localStorage.getItem(k) || 0;
+  });
 }
 
-// Listen for Mexico votes
-onValue(ref(db,"votes/Mexico"),(snapshot)=>{
-    document.getElementById("mexicoVotes").textContent = snapshot.val() || 0;
-});
+function vote(team){
+  let current = localStorage.getItem(team) || 0;
+  current++;
+  localStorage.setItem(team, current);
+  loadVotes();
+}
 
-// Listen for South Africa votes
-onValue(ref(db,"votes/South Africa"),(snapshot)=>{
-    document.getElementById("saVotes").textContent = snapshot.val() || 0;
-});
-
-// Listen for South Korea votes
-onValue(ref(db,"votes/South Korea"),(snapshot)=>{
-    document.getElementById("koreaVotes").textContent = snapshot.val() || 0;
-});
-
-// Listen for Czech Republic votes
-onValue(ref(db,"votes/Czech Republic"),(snapshot)=>{
-    document.getElementById("czechVotes").textContent = snapshot.val() || 0;
-});
-
+loadVotes();
 </script>
 
 </body>
